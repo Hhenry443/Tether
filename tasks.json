@@ -1,0 +1,34 @@
+{
+    "1": {
+        "task": "Make sure that you cant duplicate profile names",
+        "done": false
+    },
+    "2": {
+        "task": "make sure you can delete profiles",
+        "done": false
+    },
+    "3": {
+        "task": "make logic for actually connecting to the profile",
+        "done": false
+    },
+    "4": {
+        "task": "neaten up outputs",
+        "done": false
+    },
+    "5": {
+        "task": "Better UX",
+        "done": false
+    },
+    "6": {
+        "task": "at the minute, it overides any existing profile with the same name. Add a warning before this happens, but keep it as a feature.",
+        "done": false
+    },
+    "7": {
+        "task": "Have more strict forms, no null values for example",
+        "done": false
+    },
+    "8": {
+        "task": "make sure empty json handled correctly",
+        "done": false
+    }
+}
