@@ -22,6 +22,7 @@ add_parser = subparsers.add_parser("add", help="Add a new connection")
 add_parser.add_argument("profile_name", type=str, help="The profile alias")
 add_parser.add_argument("user", type=str, help="The system user")
 add_parser.add_argument("ip", type=str, help="The system IP")
+add_parser.add_argument("password", type=str, help="The system password")
 add_parser.add_argument("-p", "--port", type=int, default=22, help="The port number (default: 22)")
 
 # List saved connections command
@@ -59,52 +60,61 @@ def display_view_connections(profileName=None):
     if profileName is not None:
         if profileName in connections:
             connection = connections[profileName]
-            # Create a table for a single connection profile
             table = Table(show_header=True, header_style="bold blue")
             table.add_column("Profile Name", style="dim")
             table.add_column("User")
             table.add_column("IP Address")
             table.add_column("Port")
-            table.add_row(profileName, connection['user'], connection['ip'], str(connection['port']))
+            table.add_column("Password")
+            table.add_row(profileName, connection['user'], connection['ip'], str(connection['port']), "****")
             console.print(table)
         else:
             console.print(f"[red]Profile {profileName} not found![/red]")
     else:
-        # Create a table to display all connections
         table = Table(show_header=True, header_style="bold blue")
         table.add_column("Profile Name", style="dim")
         table.add_column("User")
         table.add_column("IP Address")
         table.add_column("Port")
+        table.add_column("Password")
 
         for profile, details in connections.items():
-            table.add_row(profile, details['user'], details['ip'], str(details['port']))
+            table.add_row(profile, details['user'], details['ip'], str(details['port']), "****")
 
         console.print(table)
+        console.print('\n')
     
-    Prompt.ask("Enter to go back")
+    Prompt.ask("Enter to continue")
 
 def display_add_connection_menu():
     console.print("\n")
     console.print(Panel("Add a Connection", style="bold red"))
     console.print("\n")
-
-    # Prompt for the connection details
     profile_name = Prompt.ask("Enter profile alias")
-    user = Prompt.ask("Enter system user")
-    ip = Prompt.ask("Enter system IP")
-    port = Prompt.ask("Enter port", default=22)
-
-    # Save the connection details to the JSON file
+    
     connections = load_connections()
-    connections[profile_name] = {"user": user, "ip": ip, "port": port}
+    if profile_name in connections:
+        console.print(f"\nYou are about to override the profile {profile_name}.")
+        ans = Prompt.ask("Is that ok? Y/n")
+        if ans == "Y":
+            console.print(f"\nOverriding {profile_name}...")
+        else:
+            console.print(f"Aborting...")
+            Prompt.ask("Enter to continue")
+            return None
+    
+    user = Prompt.ask("\nEnter system user")
+    ip = Prompt.ask("Enter system IP")
+    password = Prompt.ask("Enter password", password=True)
+    port = Prompt.ask("Enter port", default=22)
+    connections[profile_name] = {"user": user, "ip": ip, "password": password, "port": port}
     
     with open(CONNECTIONS_FILE, "w") as f:
         json.dump(connections, f, indent=4)
     
     console.print(f"Connection profile for {profile_name} added successfully.")
     console.print("\n")
-    Prompt.ask("Enter to go back")
+    Prompt.ask("Enter to continue")
 
 def display_remove_connection_menu(profile_name=None):
     console.print("\n")
@@ -124,19 +134,19 @@ def display_remove_connection_menu(profile_name=None):
     console.print(table)
     
     if profile_name == None:
-        profile_name = Prompt.ask("Enter profile alias to remove")
+        profile_name = Prompt.ask("\nEnter profile alias to remove")
         
     connections = load_connections()
     if profile_name in connections:
         del connections[profile_name]
         with open(CONNECTIONS_FILE, "w") as f:
             json.dump(connections, f, indent=4)
-        console.print(f"Profile {profile_name} removed successfully.")
+        console.print(f"\nProfile {profile_name} removed successfully.")
     else:
-        console.print(f"Profile {profile_name} not found.")
+        console.print(f"\nProfile {profile_name} not found.")
     
-    console.print("\n")
-    Prompt.ask("Enter to go back")
+    console.print("")
+    Prompt.ask("Enter to continue")
 
 def display_connection_menu():
     console.print("\n")
