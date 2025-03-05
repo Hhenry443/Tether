@@ -38,7 +38,7 @@ pip install rich
 Clone the repository to your local machine using Git:
 
 ```
-git clone https://github.com/Hhenry443/TidyTask.git
+git clone https://github.com/Hhenry443/Tether.git
 ```
 
 ### Step Two: Make the Script Executable
@@ -46,10 +46,10 @@ git clone https://github.com/Hhenry443/TidyTask.git
 You need to give the `planner` file permission to be executed as a script. Run this command in your terminal:
 
 ```
-chmod +x /path/to/TidyTask/planner
+chmod +x /path/to/tether.py
 ```
 
-Make sure to replace `/path/to/TidyTask` with the actual path where you've cloned the repository.
+Make sure to replace `/path/to/tether.py` with the actual path where you've cloned the repository.
 
 ### Step Three: Add the Directory to Your PATH
 
@@ -58,13 +58,13 @@ To make the script easily accessible from anywhere, add the directory containing
 Run the following command in your terminal:
 
 ```
-echo 'export PATH="/path/to/TidyTask:$PATH"' >> ~/.bashrc
+echo 'export PATH="/path/to/tether.py:$PATH"' >> ~/.bashrc
 ```
 
 For users with zsh (the default shell for macOS), use this instead:
 
 ```
-echo 'export PATH="/path/to/TidyTask:$PATH"' >> ~/.zshrc
+echo 'export PATH="/path/to/tether.py:$PATH"' >> ~/.zshrc
 ```
 
 Afterwards, apply the changes by running:
@@ -79,7 +79,7 @@ source ~/.zshrc   # For zsh users
 Now, you can run the script by typing:
 
 ```
-planner
+tether
 ```
 
 from anywhere in the terminal, and it will execute the program.
@@ -91,10 +91,10 @@ You can use Tether either through CLI commands or in interactive mode.
 ### CLI Commands
 
 ```
-python tether.py add <profile_name> <user> <ip> <password> [-p <port>]
-python tether.py list [profile_name]
-python tether.py connect <profile_name>
-python tether.py remove <profile_name>
+tether add <profile_name> <user> <ip> <password> [-p <port>]
+tether list [profile_name]
+tether connect <profile_name>
+tether remove <profile_name>
 ```
 
 #### Examples:
@@ -102,25 +102,25 @@ python tether.py remove <profile_name>
 Add a new profile:
 
 ```
-python tether.py add myserver user123 192.168.1.100 mypassword -p 2222
+tether add myserver user123 192.168.1.100 mypassword -p 2222
 ```
 
 List all profiles:
 
 ```
-python tether.py list
+tether list
 ```
 
 Connect to a saved profile:
 
 ```
-python tether.py connect myserver
+tether connect myserver
 ```
 
 Remove a profile:
 
 ```
-python tether.py remove myserver
+tether remove myserver
 ```
 
 ### Interactive Mode
@@ -128,7 +128,7 @@ python tether.py remove myserver
 Simply run the script without arguments to start the interactive CLI:
 
 ```
-python tether.py
+tether
 ```
 
 This mode presents a menu where you can manage your SSH profiles interactively.
