@@ -1,8 +1,14 @@
 {
-    "raspberrypi": {
+    "raspberryPi": {
         "user": "henrybarnes",
-        "ip": "198.162.0.4",
+        "ip": "raspberrypi.local",
         "password": "pi",
-        "port": "22"
+        "port": 22
+    },
+    "Test": {
+        "user": "root",
+        "ip": "999",
+        "password": "9",
+        "port": 22
     }
 }

@@ -8,7 +8,7 @@ from rich.table import Table
 import os
 import json
 
-CONNECTIONS_FILE = "/Users/henrybarnes/Documents/GIT/SSH Manager/profiles.json"
+CONNECTIONS_FILE = "/Path/to/profiles.json"
 console = Console()
 
 # Argument parser
@@ -50,6 +50,18 @@ def load_connections():
             return {}
     return {}
 
+def display_connections_table(connections):
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("Profile Name", style="dim")
+    table.add_column("User")
+    table.add_column("IP Address")
+    table.add_column("Port")
+    table.add_column("Password")
+
+    for profile, details in connections.items():
+        table.add_row(profile, details['user'], details['ip'], str(details['port']), "****")
+    
+    console.print(table)
 
 def display_view_connections(profileName=None):
     console.print("\n")
@@ -60,83 +72,88 @@ def display_view_connections(profileName=None):
     if profileName is not None:
         if profileName in connections:
             connection = connections[profileName]
-            table = Table(show_header=True, header_style="bold blue")
-            table.add_column("Profile Name", style="dim")
-            table.add_column("User")
-            table.add_column("IP Address")
-            table.add_column("Port")
-            table.add_column("Password")
-            table.add_row(profileName, connection['user'], connection['ip'], str(connection['port']), "****")
-            console.print(table)
+            display_connections_table({profileName: connection})
         else:
             console.print(f"[red]Profile {profileName} not found![/red]")
     else:
-        table = Table(show_header=True, header_style="bold blue")
-        table.add_column("Profile Name", style="dim")
-        table.add_column("User")
-        table.add_column("IP Address")
-        table.add_column("Port")
-        table.add_column("Password")
-
-        for profile, details in connections.items():
-            table.add_row(profile, details['user'], details['ip'], str(details['port']), "****")
-
-        console.print(table)
-        console.print('\n')
+        display_connections_table(connections)
     
-    Prompt.ask("Enter to continue")
+    Prompt.ask("Press Enter to continue")
 
 def display_add_connection_menu():
     console.print("\n")
-    console.print(Panel("Add a Connection", style="bold red"))
-    console.print("\n")
-    profile_name = Prompt.ask("Enter profile alias")
-    
+    console.print(Panel("Add a Connection (type 'exit' to cancel)", style="bold red"))
     connections = load_connections()
+
+    display_connections_table(connections)
+
+    while True:
+        profile_name = Prompt.ask("Enter profile alias (or 'exit' to cancel)")
+        if profile_name.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if profile_name:
+            break
+
     if profile_name in connections:
         console.print(f"\nYou are about to override the profile {profile_name}.")
         ans = Prompt.ask("Is that ok? Y/n")
-        if ans == "Y":
-            console.print(f"\nOverriding {profile_name}...")
-        else:
-            console.print(f"Aborting...")
-            Prompt.ask("Enter to continue")
-            return None
+        if ans.lower() != "y":
+            console.print("Aborting...")
+            return
     
-    user = Prompt.ask("\nEnter system user")
-    ip = Prompt.ask("Enter system IP")
-    password = Prompt.ask("Enter password", password=True)
-    port = Prompt.ask("Enter port", default=22)
-    connections[profile_name] = {"user": user, "ip": ip, "password": password, "port": port}
+    while True:
+        user = Prompt.ask("\nEnter system user (or 'exit' to cancel)")
+        if user.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if user:
+            break
+    
+    while True:
+        ip = Prompt.ask("Enter system IP (or 'exit' to cancel)")
+        if ip.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if ip:
+            break
+            
+    while True: 
+        password = Prompt.ask("Enter password (or 'exit' to cancel)", password=True)
+        if password.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if password:
+            break
+            
+    port = Prompt.ask("Enter port", default="22")
+
+    connections[profile_name] = {"user": user, "ip": ip, "password": password, "port": int(port)}
     
     with open(CONNECTIONS_FILE, "w") as f:
         json.dump(connections, f, indent=4)
     
-    console.print(f"Connection profile for {profile_name} added successfully.")
-    console.print("\n")
-    Prompt.ask("Enter to continue")
+    console.print(f"\n[green]Connection profile for {profile_name} added successfully.[/green]\n")
+
+    Prompt.ask('Press Enter To Exit')
 
 def display_remove_connection_menu(profile_name=None):
     console.print("\n")
     console.print(Panel("Delete a Connection", style="bold red"))
-    
     connections = load_connections()
-    
-    table = Table(show_header=True, header_style="bold blue")
-    table.add_column("Profile Name", style="dim")
-    table.add_column("User")
-    table.add_column("IP Address")
-    table.add_column("Port")
 
-    for profile, details in connections.items():
-        table.add_row(profile, details['user'], details['ip'], str(details['port']))
-
-    console.print(table)
+    # Show connections before asking for a profile
+    display_connections_table(connections)
     
-    if profile_name == None:
-        profile_name = Prompt.ask("\nEnter profile alias to remove")
+    while True:
+        profile_name = Prompt.ask("\nEnter profile alias to remove (or 'exit' to cancel)")
+        if profile_name.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if profile_name in connections:
+            break
+        console.print("[red]Profile not found. Try again.[/red]")
         
-    connections = load_connections()
     if profile_name in connections:
         del connections[profile_name]
         with open(CONNECTIONS_FILE, "w") as f:
@@ -146,32 +163,39 @@ def display_remove_connection_menu(profile_name=None):
         console.print(f"\nProfile {profile_name} not found.")
     
     console.print("")
-    Prompt.ask("Enter to continue")
+    Prompt.ask("Press Enter to continue")
 
 def display_connection_menu():
     console.print("\n")
-    console.print(Panel("What Profile Do You Want To Connect To?", style="bold red"))
+    console.print(Panel("What Profile Do You Want To Connect To? (type 'exit' to cancel)", style="bold red"))
+
+    connections = load_connections()
+    display_connections_table(connections)
     
+    while True:
+        profile_name = Prompt.ask("\nEnter profile alias to connect to (or 'exit' to cancel)")
+        if profile_name.lower() == "exit":
+            console.print("[yellow]Operation cancelled.[/yellow]")
+            return
+        if profile_name:
+            break
+    
+    connect(profile_name)
+
+    
+def connect(profile_name):
     connections = load_connections()
     
-    table = Table(show_header=True, header_style="bold blue")
-    table.add_column("Profile Name", style="dim")
-    table.add_column("User")
-    table.add_column("IP Address")
-    table.add_column("Port")
-
-    for profile, details in connections.items():
-        table.add_row(profile, details['user'], details['ip'], str(details['port']))
+    if profile_name not in connections:
+        console.print(f"[red]Profile {profile_name} not found![/red]")
+        Prompt.ask('Enter to continue')
+        return
     
-    console.print(table)
-    console.print("\n")
+    profile = connections[profile_name]
+    ssh_command = f"sshpass -p '{profile['password']}' ssh -p {profile['port']} {profile['user']}@{profile['ip']}"
     
-    profile_name = Prompt.ask("Enter profile name to connect")
-    connect(profile_name)
-    
-def connect(profileName=None):
-    console.print("\n")
-    console.print(Panel("What Profile Do You Want To Connect To?", style="bold red"))
+    console.print(f"[green]Connecting to {profile_name} ({profile['user']}@{profile['ip']} on port {profile['port']})...[/green]")
+    os.system(ssh_command)
     
 def main():
     # If no command is passed, start interactive menu
@@ -207,6 +231,7 @@ def main():
     elif args.command == "list":
         display_view_connections(args.profile_name)
     elif args.command == "connect":
+        connect(args.profile_name)
         console.print(f"Connecting to profile: {args.profile_name}...")
     elif args.command == "remove":
         display_remove_connection_menu(args.profile_name)
